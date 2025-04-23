@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+AU+SA:wght@100..400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <button class="profile">
+            <span class="material-symbols-rounded">account_circle</span>
+        </button>
+        <button class="menu">
+            <span class="material-symbols-rounded">settings</span>
+        </button>
+    </nav>
+
+    <header>
+        <h3>Good Morning</h3>
+        <h2>Avani</h2>
+    </header>
+
+    <main>
+        <section class="time-details">
+            <div class="time-block">
+                <div class="time-block-header">
+                    <h3>Timer Details</h3>
+                </div>
+            
+                <div class="time-table">
+                    <table id="time-details">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Timer</th>
+                                <th>Total Time</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timersUsed">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="timer-container">
+        <div class="timer-block">
+            <div id="timer">
+                <span id="hoursDisplay">00</span>:<span id="minutesDisplay">00</span>:<span id="secondsDisplay">00</span>
+            </div>
+            <button id="control-btn">Start</button>
+        </div>
+    </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
