@@ -225,7 +225,7 @@ main {
     align-items: center;
     justify-content: center;
 }
-
+ 
 #control-btn { 
     background-color: #1f2839;
     color: #B69D74;
@@ -234,11 +234,11 @@ main {
     font-size: 18px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 #control-btn:hover { 
     background-color: #B69D74;
+    color: #1f2839;
 }
 
 #control-btn.stop { 

@@ -1,95 +1,129 @@
-// let hours = 0;
-// let minutes = 0;
-// let seconds = 0;
+// const startBtn = document.getElementById("start");
+// const pauseBtn = document.getElementById("pause");
 
-// const controlBtn = document.getElementById("controlBtn");
-// const displayTimer = document.getElementsId("timer")
-
-
-// function startTimer(){
-//     seconds++
-//     if(seconds === 60){
-//         seconds = 0;
-//         minutes++
-//         if(minutes === 60){
-//             minutes = 0;
-//             hours++;
-//         }
-//     }
-// }
-
-let timerData = {}; 
-// let timerDetails = {};
-let timerCount = 0;
-let currentTimerId = null;
-let isTimeRunning = false;
-
-let hours = 0;
-let minutes = 0;
-let seconds = 0;
-let timerInterval =null;
-
-
-const timeTable = document.getElementById("timersUsed");
-const controlBtn = document.getElementById("control-btn");
 const hoursDisplay = document.getElementById("hoursDisplay");
 const minutesDisplay = document.getElementById("minutesDisplay");
 const secondsDisplay = document.getElementById("secondsDisplay");
 
-const storedTimerData = localStorage.getItem('timerData');
-const storedTimerCount = localStorage.getItem('timerCount');
+// let timeData = { fragments: [] };
+let timerData = {};
+let currentTimerId = null;
 
-if (storedTimerData) {
-    try {
-        timerData = JSON.parse(storedTimerData);
-        timerCount = parseInt(storedTimerCount || '0');
+let timerCount = 0;
+let hours = 0;
+let minutes = 0;
+let seconds = 0;
+let totalTime = null;    
+let timeStart = null;
+let timeEnd = null;
 
-        for(const timerId in timerData){
-            const timer = timerData[timerId];
-            addDataToTable(timerId, timer.label, timer.totalTime, timer.startDate)
+
+let isTimeRunning = false;
+let timerInterval = null;
+
+let totalSecondsBeforeResume = null;
+let resumedDisplaySeconds = null;
+
+const timeTable = document.getElementById("timersUsed");
+const controlBtn = document.getElementById("control-btn");
+
+
+function loadPage() {
+
+    const storedTimerData = localStorage.getItem('timerData');
+    const storedTimerCount = localStorage.getItem('timerCount');
+
+    if (storedTimerData) {
+
+        try {
+
+            timerData = JSON.parse(storedTimerData);
+            timerCount = parseInt(storedTimerCount || '0');
+
+            
+            for (const timerId in timerData) {
+                const timer = timerData[timerId];
+                addDataToTable(timerId, timer.label, timer.totalTime, timer.startDate);
+            }
+        } catch(err) {
+            console.error("Error loading data", err);
         }
-    }catch(err){
-        console.error("Error loading data", err);
-        timerData = {};
-        timerCount = 0; 
-        localStorage.removeItem('timerData');
-        localStorage.removeItem('timerCount');
     }
-
 }
 
-function addDataToTable(id, label, totalTime, data){
-    let row = document.querySelector(`tr[data-timer-id="${id}"]`);
 
-    if(!row){
-        row = document.createElement("tr");
-        row.setAttribute('data-timer-id', id);
+function formatTime(time) {
+    return time < 10 ? `0${time}` : `${time}`;
+}
 
-        row.innerHTML = `
-            <td>${data}</td>
+function timeToSeconds(timeString) {
+    const [h, m, s] = timeString.split(':').map(Number);
+    return h * 3600 + m * 60 + s;
+}
+
+function formatTimeFromSeconds(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`;
+}
+
+function getCurrentTotalSeconds() {
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+
+function updateTimerDisplay() {
+    hoursDisplay.textContent = formatTime(hours);
+    minutesDisplay.textContent = formatTime(minutes);
+    secondsDisplay.textContent = formatTime(seconds);
+}
+
+function resetTimerDisplay() {
+    hours = 0;
+    minutes = 0;
+    seconds = 0;
+    updateTimerDisplay();
+}
+
+function addDataToTable(id, label, totalTime, date) {
+    let newRow = document.querySelector(`tr[data-timer-id="${id}"]`);
+
+    if (!newRow) {
+        newRow = document.createElement("tr");
+        newRow.setAttribute('data-timer-id', id);
+
+        newRow.innerHTML = `
+            <td>${date}</td>
             <td>${label}</td>
             <td class="timer-time">${totalTime}</td>
-            <td><button class="action-btn details-btn">Details</button></td>
+            <td>
+                <button class="action-btn detail-btn">Details</button>
+                <button class="action-btn delete-btn">Delete</button>
+            </td>
         `;
 
-        timeTable.appendChild(row);
-
-        row.querySelector('.details-btn').addEventListener('click', function() {
+        timeTable.appendChild(newRow);
+        newRow.querySelector('.detail-btn').addEventListener('click', function() {
             toggleTimerDetails(id);
         });
-
-    } else {
         
-        const timeCell = row.querySelector('.timer-time'); 
+        newRow.querySelector('.delete-btn').addEventListener('click', function() {
+            if (confirm("Are you sure to delete this timer?")) {
+                deleteTimer(id);
+            }
+        });
+    } else {
+
+        const timeCell = newRow.querySelector('.timer-time');
         if (timeCell) {
             timeCell.textContent = totalTime;
         }
     }
 
-
-    if(!document.querySelector(`.timer-details-panel[data-timer-id="${id}"]`)){
+    if (!document.querySelector(`.timer-details-panel[data-timer-id="${id}"]`)) {
         const detailsPanel = document.createElement('tr');
-        detailsPanel.classList.add(('timer-details-panel'));
+        detailsPanel.classList.add('timer-details-panel');
         detailsPanel.setAttribute('data-timer-id', id);
         detailsPanel.innerHTML = `
             <td colspan="4">
@@ -97,119 +131,85 @@ function addDataToTable(id, label, totalTime, data){
             </td>
         `;
 
-        row.parentNode.insertBefore(detailsPanel, row.nextSibling);
+        newRow.parentNode.insertBefore(detailsPanel, newRow.nextSibling);
     }
 }
 
-function toggleTimerDetails(timerId){
+function toggleTimerDetails(timerId) {
     const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${timerId}"]`);
 
-
-    if(detailsPanel.style.display === 'table-row'){
+    if (detailsPanel.style.display === 'table-newRow') {
         detailsPanel.style.display = 'none';
-    }else{
+    } else {
         document.querySelectorAll('.timer-details-panel').forEach(panel => {
             panel.style.display = 'none';
         });
 
         detailsPanel.style.display = 'table-row';
-
-
         updateTimeFragments(timerId);
-
     }
 }
 
-function updateTimeFragments(timerId){
+function updateTimeFragments(timerId) {
     const timer = timerData[timerId];
-    const timeFragmentContainer = document.querySelector(`.timer-details-panel[data-timer-id="${timerId}"] .timer-fragments`);
+    const fragmentContainer = document.querySelector(`.timer-details-panel[data-timer-id="${timerId}"] .timer-fragments`);
 
-    if(timer && timer.fragments && timeFragmentContainer){
-        timeFragmentContainer.innerHTML = '';
-         
-        if(timer.fragments.length === 0){
-            timeFragmentContainer.innerHTML = '<p>No records</p>';
-        }else{
+    if (timer && timer.fragments && fragmentContainer) {
+        fragmentContainer.innerHTML = '';
+
+        if (timer.fragments.length === 0) {
+            fragmentContainer.innerHTML = '<p>No records</p>';
+        } else {
             timer.fragments.forEach((fragment, index) => {
                 const fragmentDiv = document.createElement('div');
                 fragmentDiv.classList.add('timer-fragment');
 
                 fragmentDiv.innerHTML = `
-                <div>
-                    <strong>Timer ${index + 1}</strong>: ${fragment.startTime}
-                    <span>Duration: ${fragment.duration}</span>
-                </div>
-                <button class="fragment-resume" data-time="${fragment.totalTime}" data-timer-id="${timerId}">Resume</button>
-            `;
+                    <div>
+                        <strong>Timer ${index}</strong>: ${fragment.startTime}
+                        <span>Duration: ${fragment.duration}</span>
+                    </div>
+                    <button class="fragment-resume" data-time="${fragment.totalTime}" data-timer-id="${timerId}">Resume</button>
+                `;
 
-            timeFragmentContainer.appendChild(fragmentDiv);
+                fragmentContainer.appendChild(fragmentDiv);
 
-            fragmentDiv.querySelector('.fragment-resume').addEventListener('click', function(){
-                const timeStr = this.getAttribute('data-time');
-                const timerId = this.getAttribute('data-timer-id');
-                resumeFromTime(timerId, timeStr)
+                fragmentDiv.querySelector('.fragment-resume').addEventListener('click', function() {
+                    const timeStr = this.getAttribute('data-time');
+                    const timerId = this.getAttribute('data-timer-id');
+                    resumeFromTime(timerId, timeStr);
                 });
-
-            })
+            });
         }
     }
 }
 
-function resumeFromTime(timerId, timeString){
-    if(isTimeRunning){
-        stopTimer();
+function resumeFromTime(timerIdToResume, timeString) {
+    if (isTimeRunning) {
+        stopTimer(false);
     }
 
-    const totalSeconds = timeToSeconds(timeString);
-    hours = Math.floor(totalSeconds / 3600);
-    minutes = Math.floor((totalSeconds % 3600) / 60);
-    seconds = totalSeconds % 60;
+    if (!timerData[timerIdToResume]) {
+        return;
+    }
 
+    const timer = timerData[timerIdToResume];
+
+    totalSecondsBeforeResume = timeToSeconds(timer.totalTime);
+    resumedDisplaySeconds = timeToSeconds(timeString);
+
+    hours = Math.floor(resumedDisplaySeconds / 3600);
+    minutes = Math.floor((resumedDisplaySeconds % 3600) / 60);
+    seconds = resumedDisplaySeconds % 60;
     updateTimerDisplay();
 
-    currentTimerId = timerId;
-
+    currentTimerId = timerIdToResume;
     startTimer();
 }
 
+function startTimer() {
 
-
-function formatTime(time){
-    return time < 10 ? `0${time}` : `${time}`;
-}
-
-function timeToSeconds(timeString){
-    const [h, m, s] = timeString.split(':').map(Number);
-    return h * 3600 + m * 60 + s;
-}
-
-function getCurrentTotalSeconds(){
-    return hours * 3600 + minutes * 60 + seconds;
-}
-
-function updateTimerDisplay(){
-    hoursDisplay.textContent = formatTime(hours);
-    minutesDisplay.textContent = formatTime(minutes);
-    secondsDisplay.textContent = formatTime(seconds);
-}
-
-function formatTimeFromSeconds(totalSeconds){
-    const h = Math.floor(totalSeconds / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = totalSeconds % 60;
-    return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`;
-}
-
-function resetTimerDisplay(){
-    hours = 0;
-    minutes = 0;
-    seconds = 0;
-    updateTimerDisplay();
-}
-
-function startTimer(){
-
-    if(!isTimeRunning){
+    if (!isTimeRunning) {
         isTimeRunning = true;
         controlBtn.textContent = "Stop";
         controlBtn.classList.add("stop");
@@ -217,16 +217,14 @@ function startTimer(){
         if (currentTimerId === null) {
             timerCount++;
             localStorage.setItem('timerCount', String(timerCount));
-            currentTimerId = `timer-${timerCount}`; 
+            currentTimerId = `timer-${timerCount}`;
 
             timerData[currentTimerId] = {
-
                 label: `Timer ${timerCount}`,
                 startDate: new Date().toLocaleDateString(),
                 totalTime: "00:00:00",
                 fragments: [],
                 currentSeconds: 0
-
             };
 
             addDataToTable(
@@ -236,93 +234,129 @@ function startTimer(){
                 timerData[currentTimerId].startDate
             );
         }
-       
 
         saveTimerData();
 
         timerInterval = setInterval(function() {
-            seconds++
-            if(seconds === 60){
+            seconds++;
+            if (seconds === 60) {
                 seconds = 0;
-                minutes++
-                if(minutes === 60){
+                minutes++;
+                if (minutes === 60) {
                     minutes = 0;
                     hours++;
                 }
             }
             updateTimerDisplay();
-        }, 1000)
-    }else{
+        }, 1000);
+    } else {
         stopTimer();
     }
 }
- 
 
-function stopTimer(){
-    if(isTimeRunning){
+
+function stopTimer(resetDisplayAndId = true) {
+    if(isTimeRunning) {
         clearInterval(timerInterval);
-        // seconds = 0;
-        // minutes = 0;
-        // hours = 0;
-
         timerInterval = null;
         isTimeRunning = false;
+         
         controlBtn.textContent = "Start";
         controlBtn.classList.remove("stop");
 
-        if(currentTimerId && timerData[currentTimerId]){
+        if (currentTimerId && timerData[currentTimerId]) {
             const timer = timerData[currentTimerId];
             const fragmentEndTime = new Date();
-            const totalSeconds = getCurrentTotalSeconds();
+            const currentDisplaySeconds = getCurrentTotalSeconds();
+
+            let fragmentDurationSeconds;
+            let newTotalSeconds;
+
+            if (totalSecondsBeforeResume !== null && resumedDisplaySeconds !== null) {
+                
+                const elapsedSinceResume = currentDisplaySeconds - resumedDisplaySeconds;
+                fragmentDurationSeconds = Math.max(0, elapsedSinceResume);
+                newTotalSeconds = totalSecondsBeforeResume + fragmentDurationSeconds;
+            } else {
+                const previousTotalSeconds = timer.fragments.length > 0
+                    ? timeToSeconds(timer.fragments[timer.fragments.length - 1].totalTime)
+                    : 0;
+                fragmentDurationSeconds = Math.max(0, currentDisplaySeconds - previousTotalSeconds);
+                newTotalSeconds = currentDisplaySeconds;
+            }
 
             timer.fragments.push({
                 startTime: fragmentEndTime.toLocaleString(),
-                duration: formatTimeFromSeconds(totalSeconds - timeToSeconds(timer.totalTime)),
-                totalTime: formatTimeFromSeconds(totalSeconds)
+                duration: formatTimeFromSeconds(fragmentDurationSeconds),
+                totalTime: formatTimeFromSeconds(newTotalSeconds)
             });
+            timer.totalTime = formatTimeFromSeconds(newTotalSeconds);
 
-            timer.totalTime =formatTimeFromSeconds(totalSeconds);
-
-
-            const row = document.querySelector(`tr[data-timer-id="${currentTimerId}"]`);
-            if(row){
-                const timeCell = row.querySelector('.timer-time'); 
+            const newRow = document.querySelector(`tr[data-timer-id="${currentTimerId}"]`);
+            if (newRow) {
+                const timeCell = newRow.querySelector('.timer-time');
                 if (timeCell) {
                     timeCell.textContent = timer.totalTime;
                 }
             }
 
             saveTimerData();
+
+            const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${currentTimerId}"]`);
+            if (detailsPanel && detailsPanel.style.display === 'table-newRow') {
+                updateTimeFragments(currentTimerId);
+            }
         }
 
-        resetTimerDisplay();
-        currentTimerId = null;
+        totalSecondsBeforeResume = null;
+        resumedDisplaySeconds = null;
+
+        if (resetDisplayAndId) {
+            resetTimerDisplay();
+            currentTimerId = null;
+        }
     }
 }
 
-
-// function createNewTimer(){
-//     if(isTimeRunning){
-//         stopTimer();
-
-//         resetTimerDisplay();
-
-//         currentTimerId = null;
-//     }
-// }
-
-function saveTimerData(){
-    try{
-        localStorage.setItem('timerData', JSON.stringify(timerData));  
-    }catch(err){
+function saveTimerData() {
+    try {
+        localStorage.setItem('timerData', JSON.stringify(timerData));
+    } catch (err) {
         console.error("Error saving", err);
     }
 }
 
+function deleteTimer(timerId) {
+    
+    if(isTimeRunning && currentTimerId === timerId){
+        stopTimer();
+    }
+    if(currentTimerId === timerId){
+        currentTimerId = null;
+        resetTimerDisplay();
+    }
+    
+   
+    if(timerData[timerId]){
+        delete timerData[timerId];
+        saveTimerData();
+    }
+    const newRow = document.querySelector(`tr[data-timer-id="${timerId}"]`);
+    const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${timerId}"]`);
+    
+    if(newRow){
+        newRow.remove();
+    }
+ 
+    if(detailsPanel){
+        detailsPanel.remove();
+    }
+}
 
-function initializeApp(){
+function startPage() {
+    loadPage();
     resetTimerDisplay();
     controlBtn.addEventListener("click", startTimer);
 }
 
-initializeApp();
+startPage();
