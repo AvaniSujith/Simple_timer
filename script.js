@@ -98,8 +98,10 @@ function addDataToTable(id, label, totalTime, date) {
             <td>${label}</td>
             <td class="timer-time">${totalTime}</td>
             <td>
-                <button class="action-btn detail-btn">Details</button>
-                <button class="action-btn delete-btn">Delete</button>
+                <div class="btn-controls">
+                    <button class="action-btn detail-btn">Details</button>
+                    <button class="action-btn delete-btn">Delete</button>
+                </div>
             </td>
         `;
 
@@ -341,6 +343,7 @@ function deleteTimer(timerId) {
         delete timerData[timerId];
         saveTimerData();
     }
+
     const newRow = document.querySelector(`tr[data-timer-id="${timerId}"]`);
     const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${timerId}"]`);
     

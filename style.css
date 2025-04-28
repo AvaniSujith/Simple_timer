@@ -319,6 +319,12 @@ main {
     #control-btn{
         padding: 10px 20px;
     }
+
+    .btn-controls{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
 }
 
 @media screen and (max-width:995px){
@@ -326,5 +332,5 @@ main {
     main{
         flex-direction: column;
     }
-    
+
 }
