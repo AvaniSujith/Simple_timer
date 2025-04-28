@@ -127,7 +127,7 @@ function addDataToTable(id, label, totalTime, date) {
         detailsPanel.classList.add('timer-details-panel');
         detailsPanel.setAttribute('data-timer-id', id);
         detailsPanel.innerHTML = `
-            <td colspan="4">
+            <td colspan="3">
                 <div class="timer-fragments"></div>
             </td>
         `;
