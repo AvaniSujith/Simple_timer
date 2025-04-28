@@ -12,7 +12,7 @@
 }
   
 body{
-    background-color: #F2FDEF;
+    background-color: #F5F5F5;
 }
 
 
@@ -158,12 +158,12 @@ main {
 
 #time-details th { 
     font-weight: 600;
-    color: #F2FDEF;
+    color: #F5F5F5;
 }
 
 .action-btn { 
     background-color: #1f2839;
-    color: #F2FDEF;
+    color: #F5F5F5;
     border: none;
     padding: 6px 12px;
     border-radius: 4px;
@@ -171,7 +171,7 @@ main {
 }
 
 .action-btn:hover { 
-    background-color: #F2FDEF;
+    background-color: #F5F5F5;
     color: #1f2839;
 }
 
@@ -196,7 +196,7 @@ main {
 }
 
 .fragment-resume { 
-    background-color: #F2FDEF;
+    background-color: #F5F5F5;
     color: #1f2839;
     border: none;
     padding: 4px 10px;
@@ -207,7 +207,7 @@ main {
 
 .fragment-resume:hover { 
     background-color: #1f2839;
-    color: #F2FDEF;
+    color: #F5F5F5;
 }
 
 .timer-block { 
@@ -224,7 +224,7 @@ main {
     color: #1f2839;
     height: 250px;
     width: 250px;
-    border: 3px solid #F2FDEF;
+    border: 3px solid #F5F5F5;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -233,7 +233,7 @@ main {
  
 #control-btn { 
     background-color: #1f2839;
-    color: #F2FDEF;
+    color: #F5F5F5;
     border: none;
     padding: 15px 60px;
     font-size: 18px;
@@ -242,18 +242,18 @@ main {
 }
 
 #control-btn:hover { 
-    background-color: #F2FDEF;
+    background-color: #F5F5F5;
     color: #1f2839;
 }
 
 #control-btn.stop { 
-    background-color: #F2FDEF;
+    background-color: #F5F5F5;
     color: #1f2839;
 }
 
 #control-btn.stop:hover{ 
     background-color: #1f2839;
-    color: #F2FDEF;
+    color: #F5F5F5;
 }
 
 
