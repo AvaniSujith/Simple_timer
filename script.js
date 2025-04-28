@@ -7,7 +7,7 @@ const secondsDisplay = document.getElementById("secondsDisplay");
 
 // let timeData = { fragments: [] };
 let timerData = {};
-let currentTimerId = null;
+let activeTimerId = null;
 
 let timerCount = 0;
 let hours = 0;
@@ -57,7 +57,7 @@ function formatTime(time) {
 }
 
 function timeToSeconds(timeString) {
-    const [h, m, s] = timeString.split(':').map(Number);
+    const [h, m, s] = timeString.split(':').map(Number); 
     return h * 3600 + m * 60 + s;
 }
 
@@ -105,6 +105,7 @@ function addDataToTable(id, label, totalTime, date) {
         `;
 
         timeTable.appendChild(newRow);
+
         newRow.querySelector('.detail-btn').addEventListener('click', function() {
             toggleTimerDetails(id);
         });
@@ -129,17 +130,17 @@ function addDataToTable(id, label, totalTime, date) {
         detailsPanel.innerHTML = `
             <td colspan="3">
                 <div class="timer-fragments"></div>
-            </td>
+            </td> 
         `;
 
-        newRow.parentNode.insertBefore(detailsPanel, newRow.nextSibling);
+        newRow.parentNode.insertBefore(detailsPanel, newRow.nextSibling); 
     }
 }
 
 function toggleTimerDetails(timerId) {
     const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${timerId}"]`);
 
-    if (detailsPanel.style.display === 'table-newRow') {
+    if (detailsPanel.style.display === 'table-row') {
         detailsPanel.style.display = 'none';
     } else {
         document.querySelectorAll('.timer-details-panel').forEach(panel => {
@@ -204,7 +205,7 @@ function resumeFromTime(timerIdToResume, timeString) {
     seconds = resumedDisplaySeconds % 60;
     updateTimerDisplay();
 
-    currentTimerId = timerIdToResume;
+    activeTimerId = timerIdToResume;
     startTimer();
 }
 
@@ -215,12 +216,12 @@ function startTimer() {
         controlBtn.textContent = "Stop";
         controlBtn.classList.add("stop");
 
-        if (currentTimerId === null) {
+        if (activeTimerId === null) {
             timerCount++;
             localStorage.setItem('timerCount', String(timerCount));
-            currentTimerId = `timer-${timerCount}`;
+            activeTimerId = `timer-${timerCount}`;
 
-            timerData[currentTimerId] = {
+            timerData[activeTimerId] = {
                 label: `Timer ${timerCount}`,
                 startDate: new Date().toLocaleDateString(),
                 totalTime: "00:00:00",
@@ -229,10 +230,10 @@ function startTimer() {
             };
 
             addDataToTable(
-                currentTimerId,
-                timerData[currentTimerId].label,
-                timerData[currentTimerId].totalTime,
-                timerData[currentTimerId].startDate
+                activeTimerId,
+                timerData[activeTimerId].label,
+                timerData[activeTimerId].totalTime,
+                timerData[activeTimerId].startDate
             );
         }
 
@@ -265,8 +266,8 @@ function stopTimer(resetDisplayAndId = true) {
         controlBtn.textContent = "Start";
         controlBtn.classList.remove("stop");
 
-        if (currentTimerId && timerData[currentTimerId]) {
-            const timer = timerData[currentTimerId];
+        if (activeTimerId && timerData[activeTimerId]) {
+            const timer = timerData[activeTimerId];
             const fragmentEndTime = new Date();
             const currentDisplaySeconds = getCurrentTotalSeconds();
 
@@ -293,7 +294,7 @@ function stopTimer(resetDisplayAndId = true) {
             });
             timer.totalTime = formatTimeFromSeconds(newTotalSeconds);
 
-            const newRow = document.querySelector(`tr[data-timer-id="${currentTimerId}"]`);
+            const newRow = document.querySelector(`tr[data-timer-id="${activeTimerId}"]`);
             if (newRow) {
                 const timeCell = newRow.querySelector('.timer-time');
                 if (timeCell) {
@@ -303,9 +304,9 @@ function stopTimer(resetDisplayAndId = true) {
 
             saveTimerData();
 
-            const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${currentTimerId}"]`);
+            const detailsPanel = document.querySelector(`.timer-details-panel[data-timer-id="${activeTimerId}"]`);
             if (detailsPanel && detailsPanel.style.display === 'table-newRow') {
-                updateTimeFragments(currentTimerId);
+                updateTimeFragments(activeTimerId);
             }
         }
 
@@ -314,7 +315,7 @@ function stopTimer(resetDisplayAndId = true) {
 
         if (resetDisplayAndId) {
             resetTimerDisplay();
-            currentTimerId = null;
+            activeTimerId = null;
         }
     }
 }
@@ -329,11 +330,11 @@ function saveTimerData() {
 
 function deleteTimer(timerId) {
     
-    if(isTimeRunning && currentTimerId === timerId){
+    if(isTimeRunning && activeTimerId === timerId){
         stopTimer();
     }
-    if(currentTimerId === timerId){
-        currentTimerId = null;
+    if(activeTimerId === timerId){
+        activeTimerId = null;
         resetTimerDisplay();
     }
     
