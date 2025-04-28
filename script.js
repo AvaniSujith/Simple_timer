@@ -94,7 +94,6 @@ function addDataToTable(id, label, totalTime, date) {
         newRow.setAttribute('data-timer-id', id);
 
         newRow.innerHTML = `
-            <td>${date}</td>
             <td>${label}</td>
             <td class="timer-time">${totalTime}</td>
             <td>
