@@ -148,6 +148,7 @@ function toggleTimerDetails(timerId) {
         });
 
         detailsPanel.style.display = 'table-row';
+
         updateTimeFragments(timerId);
     }
 }
@@ -179,14 +180,14 @@ function updateTimeFragments(timerId) {
                 fragmentDiv.querySelector('.fragment-resume').addEventListener('click', function() {
                     const timeStr = this.getAttribute('data-time');
                     const timerId = this.getAttribute('data-timer-id');
-                    resumeFromTime(timerId, timeStr);
+                    resumeFromTime(timerId, timeStr);  
                 });
             });
         }
     }
 }
 
-function resumeFromTime(timerIdToResume, timeString) {
+function resumeFromTime(timerIdToResume, timeString){
     if (isTimeRunning) {
         stopTimer(false);
     }
@@ -227,7 +228,7 @@ function startTimer() {
                 totalTime: "00:00:00",
                 fragments: [],
                 currentSeconds: 0
-            };
+            }; 
 
             addDataToTable(
                 activeTimerId,
@@ -279,13 +280,14 @@ function stopTimer(resetDisplayAndId = true) {
                 const elapsedSinceResume = currentDisplaySeconds - resumedDisplaySeconds;
                 fragmentDurationSeconds = Math.max(0, elapsedSinceResume);
                 newTotalSeconds = totalSecondsBeforeResume + fragmentDurationSeconds;
+
             } else {
                 const previousTotalSeconds = timer.fragments.length > 0
                     ? timeToSeconds(timer.fragments[timer.fragments.length - 1].totalTime)
                     : 0;
                 fragmentDurationSeconds = Math.max(0, currentDisplaySeconds - previousTotalSeconds);
                 newTotalSeconds = currentDisplaySeconds;
-            }
+            } 
 
             timer.fragments.push({
                 startTime: fragmentEndTime.toLocaleString(),
@@ -313,7 +315,7 @@ function stopTimer(resetDisplayAndId = true) {
         totalSecondsBeforeResume = null;
         resumedDisplaySeconds = null;
 
-        if (resetDisplayAndId) {
+        if (resetDisplayAndId) { 
             resetTimerDisplay();
             activeTimerId = null;
         }
